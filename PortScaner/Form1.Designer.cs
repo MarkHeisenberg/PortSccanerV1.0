@@ -108,7 +108,7 @@
             this.Controls.Add(this.helpButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Port Scanner v1.0";
             this.ResumeLayout(false);
             this.PerformLayout();
 

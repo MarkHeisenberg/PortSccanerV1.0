@@ -1,65 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net;
+using System.IO;
 using System.Net.NetworkInformation;
-using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
-using IronXL;
 
 namespace PortScaner
 {
+    //Structure for information about port
+    //use for deserializable data from file "info.data"
+    [Serializable()]
     struct PortInformation
     {
         public int port;
         public string information;
     }
+
+    //Class for get information about ports
     class PortInformer
     {
-        private static WorkBook workBook = new WorkBook();
-        public static WorkSheet worksheet;
-        private static bool infoIsOpened = false;
+        private static bool infoIsOpened = false; //if info file opened
+        private static List<PortInformation> portInfoData = new List<PortInformation>(); // list of structure from file
+        public PortInformer() => InitializeHelpInfoFromFile(); //Constructor, try to open help file
 
-        public PortInformer() => InitializeHelpInfoFromXls();
-
-        private static void InitializeHelpInfoFromXls()
+        private static void InitializeHelpInfoFromFile()
         {
+            //open file with info and fill list
             try
             {
-                workBook = WorkBook.Load("port_info.xls");
-                worksheet = workBook.WorkSheets.First();
+                Stream stream = File.Open("info.dat", FileMode.Open); //ATTENTION: FILE info.dat must be
+                                                                      //in directory with program, or change path
+                var bformater = new BinaryFormatter();
+                portInfoData = (List<PortInformation>)bformater.Deserialize(stream);
                 infoIsOpened = true;
             }
             catch (Exception)
             {
-                MessageBox.Show("Can`not open help file port_info.xls\nYou can`not see info about ports!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Can`not open help file info.dat\n" +
+                    "You can`not see info about ports!", "Warning!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
         public List<PortInformation> GetInformationByPortList(List<int> portList)
         {
+            // Get information about avaliable ports
             IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
             TcpConnectionInformation[] tcpConnections = ipGlobalProperties.GetActiveTcpConnections();
-            IPEndPoint[] tcpEndPoints = ipGlobalProperties.GetActiveTcpListeners();
-            IPEndPoint[] udpEndPoints = ipGlobalProperties.GetActiveUdpListeners();
             List<PortInformation> portInformationList = new List<PortInformation>();
             PortInformation portInformation;
-            foreach(var portForSearch in portList)
+            foreach (var portForSearch in portList)
             {
                 foreach (var port in tcpConnections)
                 {
-                   if(port.LocalEndPoint.Port == portForSearch)
-                   {
+                    if (port.LocalEndPoint.Port == portForSearch)
+                    {
                         portInformation.information = $"Local endpoint: " + Convert.ToString(port.LocalEndPoint) +
-                            $" | Remote endpoint: " + Convert.ToString(port.RemoteEndPoint) + 
+                            $" | Remote endpoint: " + Convert.ToString(port.RemoteEndPoint) +
                             $" | Connection: " + Convert.ToString(port.State);
                         portInformation.port = port.LocalEndPoint.Port;
                         portInformationList.Add(portInformation);
-                   }
-                   else if (port.RemoteEndPoint.Port == portForSearch)
-                   {
+                    }
+                    else if (port.RemoteEndPoint.Port == portForSearch)
+                    {
                         portInformation.information = $"Local endpoint: " + Convert.ToString(port.LocalEndPoint) +
                             $" | Remote endpoint: " + Convert.ToString(port.RemoteEndPoint) +
                             $" | Connection: " + Convert.ToString(port.State);
@@ -71,58 +74,24 @@ namespace PortScaner
             return portInformationList;
         }
 
-        public string GetInfoAboutPort(int portNumber)
+        public string GetInfoAboutPort(int portNumber) //Method for getting information about some port
+                                                       //information from site www.iana.org
         {
-            string info = $"INFO:\n";
-            bool infoIsReached = false;
-            if(infoIsOpened)
+            string info = string.Empty;
+            if (infoIsOpened) //if file with info was opened
             {
-                foreach(var cell in worksheet["B2:B14249"])
-                {
-                    if(cell.IntValue == portNumber)
-                    {
-                        infoIsReached = true;
-                        info += $"Port " + cell.Text + $"\nService name: ";
-
-                        if (worksheet.GetCellAt(cell.Address.LastRow , 0) == null)
-                            info += "no info";
-                        else if (worksheet.GetCellAt(cell.Address.LastRow , 0).IsEmpty)
-                            info += "no info";
-                        else
-                            info += Convert.ToString(worksheet.GetCellAt(cell.Address.LastRow, 0).Value);
-
-                        info += $"\nTransport protocol: ";
-                        if (worksheet.GetCellAt(cell.Address.LastRow, 2) == null)
-                            info += "no info";
-                        else if (worksheet.GetCellAt(cell.Address.LastRow, 2).IsEmpty)
-                            info += "no info";
-                        else
-                            info += Convert.ToString(worksheet.GetCellAt(cell.Address.LastRow, 2).Value);
-
-                        info += $"\nDescription: ";
-                        if (worksheet.GetCellAt(cell.Address.LastRow, 3) == null)
-                            info += "no info";
-                        else if (worksheet.GetCellAt(cell.Address.LastRow, 3).IsEmpty)
-                            info += "no info";
-                        else
-                            info += Convert.ToString(worksheet.GetCellAt(cell.Address.LastRow, 3).Value);
-
-                        info += $"\nAssignment Notes: ";
-                        if (worksheet.GetCellAt(cell.Address.LastRow, 4) == null)
-                            info += "no info";
-                        else if (worksheet.GetCellAt(cell.Address.LastRow, 4).IsEmpty)
-                            info += "no info";
-                        else
-                            info += Convert.ToString(worksheet.GetCellAt(cell.Address.LastRow, 4).Value);
-                        info += $"\n";
-                    }
-                }
+                if (portInfoData[portNumber].information != "Can`not find any info")
+                    info += portInfoData[portNumber].information;
+                else
+                    info += $"PORT:" + Convert.ToString(portInfoData[portNumber].port) +
+                        $"\n" + portInfoData[portNumber].information;
             }
             else
             {
                 info = $"Can`not load info file";
             }
-            return infoIsReached ? info : "Can`not find any info";
+            return info;
         }
+
     }
 }
