@@ -23,7 +23,7 @@ namespace PortScaner
             }
             catch (Exception)
             {
-                MessageBox.Show("Can`not find file\"info.dat\"\nSorry, but I can not help you :(",
+                MessageBox.Show("Can`not find file\"PShelp.chm\"\nSorry, but I can not help you :(",
                     "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }

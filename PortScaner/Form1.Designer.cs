@@ -38,7 +38,7 @@
             // 
             // helpButton
             // 
-            this.helpButton.BackColor = System.Drawing.Color.White;
+            this.helpButton.BackColor = System.Drawing.Color.Transparent;
             this.helpButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.helpButton.Cursor = System.Windows.Forms.Cursors.Help;
             this.helpButton.Location = new System.Drawing.Point(828, 7);
@@ -67,7 +67,7 @@
             // 
             // StartButton
             // 
-            this.StartButton.BackColor = System.Drawing.Color.White;
+            this.StartButton.BackColor = System.Drawing.Color.Transparent;
             this.StartButton.Location = new System.Drawing.Point(362, 7);
             this.StartButton.Name = "StartButton";
             this.StartButton.Size = new System.Drawing.Size(75, 23);
@@ -86,8 +86,7 @@
             this.listOfPorts.SelectedIndexChanged += new System.EventHandler(this.listOfPorts_SelectedIndexChanged);
             // 
             // richTextBox1
-            // 
-            this.richTextBox1.BackColor = System.Drawing.Color.White;
+            //
             this.richTextBox1.Location = new System.Drawing.Point(16, 223);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
