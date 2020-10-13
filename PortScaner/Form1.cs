@@ -15,6 +15,7 @@ namespace PortScaner
         private static List<int> portsNumbers = new List<int>(); //List for user ports
         private static List<PortInformation> listOfScanningPort = new List<PortInformation>(); //Information about ports
         private static PortInformer portInformer = new PortInformer(); //Object for get information about port
+
         private void button1_Click(object sender, EventArgs e)
         {
             try
